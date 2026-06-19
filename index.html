@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>New Grad Physio Wage Calculator — Culture of One</title>
+<style>
+  :root{
+    --bg:#ffffff; --surface:#f4f3ee; --ink:#1d1c1a; --muted:#6b6a64; --hint:#9a988f;
+    --gold:#C8A064; --line:rgba(0,0,0,.10);
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    line-height:1.5;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:640px;margin:0 auto;padding:32px 20px 48px;}
+  h1{font-size:24px;font-weight:600;margin:0 0 6px;letter-spacing:-.01em;}
+  .sub{color:var(--muted);font-size:15px;margin:0 0 28px;}
+  .lever{display:flex;align-items:center;gap:14px;margin:0 0 16px;}
+  .lever label{font-size:14px;color:var(--muted);flex:1;}
+  .lever input[type=range]{flex:1.6;accent-color:var(--gold);height:4px;}
+  .lever .val{font-size:15px;font-weight:600;min-width:104px;text-align:right;font-family:var(--mono);}
+  input[type=number]{font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);width:84px;text-align:right;}
+  .hero{margin:26px 0 8px;padding:22px 20px;border-radius:14px;background:var(--ink);color:#fff;text-align:center;}
+  .hero .lab{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--gold);margin:0 0 6px;}
+  .hero .big{font-size:38px;font-weight:600;margin:0;font-family:var(--mono);letter-spacing:-.01em;}
+  .hero .cap{font-size:13px;margin:8px 0 0;opacity:.7;}
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:12px 0 0;}
+  .card{border-radius:12px;padding:16px 12px;text-align:center;background:var(--surface);}
+  .card .v{font-size:12px;font-weight:600;margin:0 0 8px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);}
+  .card .net{font-size:24px;font-weight:600;margin:0;font-family:var(--mono);}
+  .summary{font-size:15px;line-height:1.6;margin:20px 0 0;padding:14px 16px;border-radius:12px;background:var(--surface);}
+  .summary b{font-weight:600;}
+  .explain{margin:28px 0 0;border-top:1px solid var(--line);padding-top:24px;}
+  .explain .row{margin:0 0 18px;}
+  .explain .lead{font-size:15px;font-weight:600;margin:0 0 3px;}
+  .explain p{font-size:14px;color:var(--muted);margin:0;line-height:1.65;}
+  .explain .note{font-size:13px;color:var(--hint);margin:4px 0 0;}
+  .foot{margin:28px 0 0;font-size:13px;color:var(--hint);text-align:center;}
+  @media(max-width:480px){.cards{grid-template-columns:1fr;}.lever{flex-wrap:wrap;}.lever .val{min-width:0;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>What a new grad physio will cost you</h1>
+  <p class="sub">The new award rates phase in to 2030. A graduate you hire later starts on a higher rung than one you hire now. Set the year, the hours, and your inflation assumption.</p>
+
+  <div class="lever"><label>Hire year (when they start)</label><input type="range" id="year" min="2027" max="2031" step="1" value="2027"><span class="val" id="year-v"></span></div>
+  <div class="lever"><label>Hours per week</label><input type="range" id="hours" min="8" max="38" step="1" value="38"><span class="val" id="hours-v"></span></div>
+  <div class="lever"><label>Assumed annual wage review</label><input type="range" id="infl" min="0" max="8" step="0.25" value="4"><span class="val" id="infl-v"></span></div>
+
+  <div class="hero">
+    <p class="lab" id="hero-lab"></p>
+    <p class="big" id="hero-big"></p>
+    <p class="cap" id="hero-cap"></p>
+  </div>
+
+  <div class="cards">
+    <div class="card"><p class="v">Hourly rate</p><p class="net" id="c-hr"></p></div>
+    <div class="card"><p class="v">Per week</p><p class="net" id="c-wk"></p></div>
+    <div class="card"><p class="v">Per year (base)</p><p class="net" id="c-yr"></p></div>
+  </div>
+
+  <div class="summary" id="summary"></div>
+
+  <div class="explain">
+    <div class="row">
+      <p class="lead">It is the award minimum for a first-year AQF 7 physiotherapist</p>
+      <p>A new graduate sits in the "1st year" band. The rate they start on depends on when you hire them, because the new structure climbs in five steps from 1 October 2026 to 30 June 2030. Hire in 2027 and they start on the first step. Hire in 2031 and they start on the last.</p>
+    </div>
+    <div class="row">
+      <p class="lead">We start from what is locked in</p>
+      <p>The base is the published 1 October 2026 rate with the confirmed 4.75% annual review applied. From there, each year adds the next phase-in step plus your assumed annual review. The 4.75% is real. Everything past it is your assumption — drag the slider to test it.</p>
+      <p class="note">The 2028, 2029 and 2030 steps are interpolated between the two figures the Commission has actually published (1 Oct 2026 and 30 Jun 2030). They will firm up as each year's determination lands.</p>
+    </div>
+    <div class="row">
+      <p class="lead">These are base wages, before on-costs</p>
+      <p>The hourly and weekly figures are the award minimum, exclusive of super. The headline cost adds 12% super. It does not include leave loading, workcover, weekend or evening penalties, or any bonus — those sit on top.</p>
+    </div>
+  </div>
+
+  <p class="foot">Pay great wages and run a great business. — Culture of One</p>
+
+</div>
+
+<script>
+(function(){
+  var aud0=new Intl.NumberFormat('en-AU',{style:'currency',currency:'AUD',maximumFractionDigits:0});
+  var aud2=new Intl.NumberFormat('en-AU',{style:'currency',currency:'AUD',minimumFractionDigits:2,maximumFractionDigits:2});
+  var g=function(id){return document.getElementById(id);};
+
+  // AQF 7, "1st year" band, structural rates in 2025 dollars, weekly full-time (38h).
+  // Stage 1 = [2026] FWCFB 123 (1 Oct 2026). Stage 5 = [2025] FWCFB 297 [53] (30 Jun 2030).
+  // Stages 2-4 linearly interpolated ("approximately equal stages").
+  var STRUCT=[1249.50,1312.10,1374.70,1437.30,1499.90];
+  var FT=38, SUPER=0.12, AWR2026=0.0475;
+
+  function update(){
+    var year=+g('year').value, hours=+g('hours').value, infl=(+g('infl').value)/100;
+    var k=year-2026;                          // 1..5
+    var factor=(1+AWR2026)*Math.pow(1+infl,k-1);
+    var weeklyFT=STRUCT[k-1]*factor;
+    var hourly=weeklyFT/FT;
+    var weekly=hourly*hours;
+    var annual=weekly*52;
+    var allin=annual*(1+SUPER);
+
+    g('year-v').textContent=year;
+    g('hours-v').textContent=hours+' hrs'+(hours===38?' (FT)':'');
+    g('infl-v').textContent=(+g('infl').value).toFixed(2)+'% / yr';
+
+    g('hero-lab').textContent='A '+year+' grad, '+hours+' hrs/week, all-in';
+    g('hero-big').textContent=aud0.format(Math.round(allin))+'/yr';
+    g('hero-cap').textContent='base wage + 12% super';
+
+    g('c-hr').textContent=aud2.format(hourly);
+    g('c-wk').textContent=aud0.format(Math.round(weekly));
+    g('c-yr').textContent=aud0.format(Math.round(annual));
+
+    // contrast vs a 2027-start grad at the same hours and inflation
+    var base2027=(STRUCT[0]*(1+AWR2026))/FT*hours*52*(1+SUPER);
+    var pct=base2027>0?Math.round((allin/base2027-1)*100):0;
+    var stageName=['first','second','third','fourth','fifth'][k-1];
+    g('summary').innerHTML='A graduate you hire in <b>'+year+'</b> starts on the <b>'+stageName+
+      '</b> phase-in step — <b>'+aud2.format(hourly)+'/hr</b>. At '+hours+' hours that is <b>'+
+      aud0.format(Math.round(allin))+'/year</b> all-in'+
+      (k>1?', about <b>'+pct+'% more</b> than the same grad hired in 2027.':' to start.');
+  }
+
+  ['year','hours','infl'].forEach(function(id){g(id).addEventListener('input',update);});
+  update();
+})();
+</script>
+</body>
+</html>
