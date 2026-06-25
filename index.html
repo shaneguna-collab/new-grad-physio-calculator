@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>New Grad Physio Wage Calculator — Culture of One</title>
+<title>New Grad Wage Calculator — Culture of One</title>
 <style>
   :root{
     --bg:#ffffff; --surface:#f4f3ee; --ink:#1d1c1a; --muted:#6b6a64; --hint:#9a988f;
@@ -21,6 +21,9 @@
   .lever label{font-size:14px;color:var(--muted);flex:1;}
   .lever input[type=range]{flex:1.6;accent-color:var(--gold);height:4px;}
   .lever .val{font-size:15px;font-weight:600;min-width:104px;text-align:right;font-family:var(--mono);}
+  .pick{display:flex;align-items:center;gap:14px;margin:0 0 16px;}
+  .pick label{font-size:14px;color:var(--muted);flex:1;}
+  .pick select{flex:1.6;font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);}
   input[type=number]{font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);width:84px;text-align:right;}
   .hero{margin:26px 0 8px;padding:22px 20px;border-radius:14px;background:var(--ink);color:#fff;text-align:center;}
   .hero .lab{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--gold);margin:0 0 6px;}
@@ -44,8 +47,28 @@
 <body>
 <div class="wrap">
 
-  <h1>What a new grad physio will cost you</h1>
-  <p class="sub">The new award rates phase in to 2030. A graduate you hire later starts on a higher rung than one you hire now. Set the year, the hours, and your inflation assumption.</p>
+  <h1>What a new grad will cost you</h1>
+  <p class="sub">The new award rates phase in to 2030. A graduate you hire later starts on a higher rung than one you hire now. Pick the profession, set the year, the hours, and your inflation assumption.</p>
+
+  <div class="pick"><label>Profession</label>
+    <select id="prof">
+      <optgroup label="AQF 7">
+        <option value="7" selected>Physiotherapist</option>
+        <option value="7">Occupational Therapist</option>
+        <option value="7">Exercise Physiologist</option>
+        <option value="7">Podiatrist</option>
+      </optgroup>
+      <optgroup label="AQF 8">
+        <option value="8">Orthoptist</option>
+      </optgroup>
+      <optgroup label="AQF 9">
+        <option value="9">Osteopath</option>
+        <option value="9">Chiropractor</option>
+        <option value="9">Psychologist</option>
+        <option value="9">Speech Pathologist</option>
+      </optgroup>
+    </select>
+  </div>
 
   <div class="lever"><label>Hire year (when they start)</label><input type="range" id="year" min="2027" max="2031" step="1" value="2027"><span class="val" id="year-v"></span></div>
   <div class="lever"><label>Hours per week</label><input type="range" id="hours" min="8" max="38" step="1" value="38"><span class="val" id="hours-v"></span></div>
@@ -67,7 +90,7 @@
 
   <div class="explain">
     <div class="row">
-      <p class="lead">It is the award minimum for a first-year AQF 7 physiotherapist</p>
+      <p class="lead">It is the award minimum for a first-year clinician</p>
       <p>A new graduate sits in the "1st year" band. The rate they start on depends on when you hire them, because the new structure climbs in five steps from 1 October 2026 to 30 June 2030. Hire in 2027 and they start on the first step. Hire in 2031 and they start on the last.</p>
     </div>
     <div class="row">
@@ -91,13 +114,18 @@
   var aud2=new Intl.NumberFormat('en-AU',{style:'currency',currency:'AUD',minimumFractionDigits:2,maximumFractionDigits:2});
   var g=function(id){return document.getElementById(id);};
 
-  // AQF 7, "1st year" band, structural rates in 2025 dollars, weekly full-time (38h).
-  // Stage 1 = [2026] FWCFB 123 (1 Oct 2026). Stage 5 = [2025] FWCFB 297 [53] (30 Jun 2030).
-  // Stages 2-4 linearly interpolated ("approximately equal stages").
-  var STRUCT=[1249.50,1312.10,1374.70,1437.30,1499.90];
+  // "1st year" band structural rates in 2025 dollars, weekly full-time (38h), by AQF level.
+  // Stage 1 = [2026] FWCFB 123 (1 Oct 2026). Stage 5 = [2025] FWCFB 297 (30 Jun 2030). 2-4 interpolated.
+  var RATES1ST={
+    7:[1249.50,1312.10,1374.70,1437.30,1499.90],
+    8:[1276.50,1343.725,1410.95,1478.175,1545.40],
+    9:[1379.40,1446.90,1514.40,1581.90,1649.40]
+  };
   var FT=38, SUPER=0.12, AWR2026=0.0475;
 
   function update(){
+    var sel=g('prof'), aqf=+sel.value, prof=sel.options[sel.selectedIndex].text;
+    var STRUCT=RATES1ST[aqf];
     var year=+g('year').value, hours=+g('hours').value, infl=(+g('infl').value)/100;
     var k=year-2026;                          // 1..5
     var factor=(1+AWR2026)*Math.pow(1+infl,k-1);
@@ -111,25 +139,25 @@
     g('hours-v').textContent=hours+' hrs'+(hours===38?' (FT)':'');
     g('infl-v').textContent=(+g('infl').value).toFixed(2)+'% / yr';
 
-    g('hero-lab').textContent='A '+year+' grad, '+hours+' hrs/week, all-in';
+    g('hero-lab').textContent='A '+year+' grad '+prof.toLowerCase()+', '+hours+' hrs/week, all-in';
     g('hero-big').textContent=aud0.format(Math.round(allin))+'/yr';
-    g('hero-cap').textContent='base wage + 12% super';
+    g('hero-cap').textContent='base wage + 12% super · AQF '+aqf;
 
     g('c-hr').textContent=aud2.format(hourly);
     g('c-wk').textContent=aud0.format(Math.round(weekly));
     g('c-yr').textContent=aud0.format(Math.round(annual));
 
-    // contrast vs a 2027-start grad at the same hours and inflation
+    // contrast vs the same hire in 2027, same profession/hours/inflation
     var base2027=(STRUCT[0]*(1+AWR2026))/FT*hours*52*(1+SUPER);
     var pct=base2027>0?Math.round((allin/base2027-1)*100):0;
     var stageName=['first','second','third','fourth','fifth'][k-1];
-    g('summary').innerHTML='A graduate you hire in <b>'+year+'</b> starts on the <b>'+stageName+
+    g('summary').innerHTML='A graduate <b>'+prof.toLowerCase()+'</b> you hire in <b>'+year+'</b> starts on the <b>'+stageName+
       '</b> phase-in step — <b>'+aud2.format(hourly)+'/hr</b>. At '+hours+' hours that is <b>'+
       aud0.format(Math.round(allin))+'/year</b> all-in'+
-      (k>1?', about <b>'+pct+'% more</b> than the same grad hired in 2027.':' to start.');
+      (k>1?', about <b>'+pct+'% more</b> than the same hire in 2027.':' to start.');
   }
 
-  ['year','hours','infl'].forEach(function(id){g(id).addEventListener('input',update);});
+  ['prof','year','hours','infl'].forEach(function(id){g(id).addEventListener('input',update);});
   update();
 })();
 </script>
